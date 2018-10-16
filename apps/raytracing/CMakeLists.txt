@@ -1,6 +1,7 @@
 add_executable(raytracing
 	shape.h
 	sphere.h sphere.cpp
+	scene.h scene.cpp
 	image.h image.cpp
 	ppm.h ppm.cpp
 	raytracing.cpp
