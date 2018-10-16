@@ -23,7 +23,7 @@ public:
 		m_direction = direction.normalized();
 	}
 
-	Vector<T, 3> point(T k) const { return m_origin + k * m_direction; }
+	Vector<T, 3> point(T distance) const { return m_origin + distance * m_direction; }
 };
 
 typedef Ray<float> Rayf;

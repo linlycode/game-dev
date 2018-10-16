@@ -1,9 +1,17 @@
 #include <iostream>
 
 #include "math/ray.h"
+#include "sphere.h"
 #include "ppm.h"
 
 Vector3f compute_color(const Rayf &ray) {
+	Sphere sphere({0, 0, -1}, 0.5f);
+	RaycastHit hit;
+	if (sphere.raycast(ray, &hit)) {
+		return 0.5f * (hit.normal + Vector3f(1, 1, 1));
+	}
+
+	// background color
 	float k = 0.5f * (ray.direction()[1] + 1);
 	return (1 - k) * Vector3f(1, 1, 1) + k * Vector3f(0.5f, 0.7f, 1);
 }
