@@ -55,12 +55,26 @@ public:
 		return v;
 	}
 
+	Vec &operator+=(const Vec &other) {
+		for (size_t i = 0; i < N; i++) {
+			m_data[i] += other[i];
+		}
+		return static_cast<Vec &>(*this);
+	}
+
 	Vec operator-(const Vec &other) const {
 		Vec v("no init");
 		for (size_t i = 0; i < N; i++) {
 			v[i] = m_data[i] - other[i];
 		}
 		return v;
+	}
+
+	Vec &operator-=(const Vec &other) {
+		for (size_t i = 0; i < N; i++) {
+			m_data[i] -= other[i];
+		}
+		return static_cast<Vec &>(*this);
 	}
 
 	// scalar multiplication
@@ -72,12 +86,26 @@ public:
 		return v;
 	}
 
+	Vec &operator*=(T s) {
+		for (size_t i = 0; i < N; i++) {
+			m_data[i] *= s;
+		}
+		return static_cast<Vec &>(*this);
+	}
+
 	Vec operator/(T s) const {
 		Vec v("no init");
 		for (size_t i = 0; i < N; i++) {
 			v[i] = m_data[i] / s;
 		}
 		return v;
+	}
+
+	Vec &operator/=(T s) {
+		for (size_t i = 0; i < N; i++) {
+			m_data[i] /= s;
+		}
+		return static_cast<Vec &>(*this);
 	}
 
 	// dot product
