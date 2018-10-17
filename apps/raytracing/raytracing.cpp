@@ -7,10 +7,26 @@
 #include "camera.h"
 #include "ppm.h"
 
+std::random_device rd;
+std::mt19937 engine(rd());
+std::uniform_real_distribution<float> dist(0, 1);
+
+Vector3f random_point_in_unit_sphere() {
+	Vector3f p;
+	do {
+		p = 2.0f * Vector3f(dist(engine), dist(engine), dist(engine)) -
+			Vector3f(1, 1, 1);
+	} while (p * p >= 1);
+	return p;
+}
+
 Vector3f compute_color(const Scene &scene, const Rayf &ray) {
 	RaycastHit hit;
 	if (scene.raycast(ray, &hit)) {
-		return 0.5f * (hit.normal + Vector3f(1, 1, 1));
+		Vector3f hitPoint = ray.point(hit.distance);
+		Vector3f newDirection = hit.normal + random_point_in_unit_sphere();
+		Rayf newRay(hitPoint, newDirection);
+		return 0.5f * compute_color(scene, newRay);
 	}
 
 	// background color
@@ -19,10 +35,6 @@ Vector3f compute_color(const Scene &scene, const Rayf &ray) {
 }
 
 void render(const Scene &scene, const Camera &camera, Image &image) {
-	std::random_device rd;
-	std::mt19937 engine(rd());
-	std::uniform_real_distribution<float> dist(0, 1);
-
 	size_t w = image.width(), h = image.height(), sampleCount = 16;
 
 	for (size_t i = 0; i < h; i++) {
@@ -35,6 +47,9 @@ void render(const Scene &scene, const Camera &camera, Image &image) {
 				color += compute_color(scene, ray);
 			}
 			color /= sampleCount;
+			// gamma approximation
+			color = Vector3f(std::sqrt(color[0]), std::sqrt(color[1]),
+							 std::sqrt(color[2]));
 			image(i, j) = Pixel(255.99f * color[0], 255.99f * color[1],
 								255.99f * color[2]);
 		}

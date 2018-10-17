@@ -20,13 +20,13 @@ bool Sphere::raycast(const Rayf &ray, RaycastHit *hit) const {
 	}
 
 	float d = (-b - std::sqrt(discriminant)) / (2 * a);
-	if (d > 0) {
+	if (d > 0.001f) {	// ignore near-zero length rays to avoid shadow acne
 		fillRaycastHit(ray, d, hit);
 		return true;
 	}
 
 	d = (-b + std::sqrt(discriminant)) / (2 * a);
-	if (d > 0) {
+	if (d > 0.001f) {
 		fillRaycastHit(ray, d, hit);
 		return true;
 	}
