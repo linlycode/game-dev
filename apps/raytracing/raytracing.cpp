@@ -1,32 +1,23 @@
-#include <random>
-#include <iostream>
-
 #include "math/ray.h"
+#include "random.h"
 #include "sphere.h"
 #include "scene.h"
 #include "camera.h"
+#include "materials/lambertian.h"
+#include "materials/metal.h"
 #include "ppm.h"
 
-std::random_device rd;
-std::mt19937 engine(rd());
-std::uniform_real_distribution<float> dist(0, 1);
-
-Vector3f random_point_in_unit_sphere() {
-	Vector3f p;
-	do {
-		p = 2.0f * Vector3f(dist(engine), dist(engine), dist(engine)) -
-			Vector3f(1, 1, 1);
-	} while (p * p >= 1);
-	return p;
-}
-
-Vector3f compute_color(const Scene &scene, const Rayf &ray) {
+Vector3f compute_color(const Scene &scene, const Rayf &ray, size_t depth) {
 	RaycastHit hit;
 	if (scene.raycast(ray, &hit)) {
-		Vector3f hitPoint = ray.point(hit.distance);
-		Vector3f newDirection = hit.normal + random_point_in_unit_sphere();
-		Rayf newRay(hitPoint, newDirection);
-		return 0.5f * compute_color(scene, newRay);
+		Rayf scattered;
+		Vector3f attenuation;
+		if (depth < 50 &&
+			hit.material->scatter(ray, hit, attenuation, scattered)) {
+			return attenuation.pointwise(
+				compute_color(scene, scattered, depth + 1));
+		}
+		return Vector3f(0, 0, 0);
 	}
 
 	// background color
@@ -35,16 +26,17 @@ Vector3f compute_color(const Scene &scene, const Rayf &ray) {
 }
 
 void render(const Scene &scene, const Camera &camera, Image &image) {
+	RandomNumberGenerator<float> randGen(0, 1);
 	size_t w = image.width(), h = image.height(), sampleCount = 16;
 
 	for (size_t i = 0; i < h; i++) {
 		for (size_t j = 0; j < w; j++) {
 			Vector3f color;
 			for (size_t s = 0; s < sampleCount; s++) {
-				float u = float(j + dist(engine)) / w,
-					  v = float(h - i - 1 - dist(engine)) / h;
+				float u = float(j + randGen()) / w,
+					  v = float(h - i - 1 - randGen()) / h;
 				Rayf ray = camera.genRay(u, v);
-				color += compute_color(scene, ray);
+				color += compute_color(scene, ray, 0);
 			}
 			color /= sampleCount;
 			// gamma approximation
@@ -57,12 +49,21 @@ void render(const Scene &scene, const Camera &camera, Image &image) {
 }
 
 int main() {
-	Sphere sphere1({0, 0, -1}, 0.5f);
-	Sphere sphere2({0, -100.5f, -1}, 100);
+	Lambertian lamb1({0.8f, 0.3f, 0.3f});
+	Lambertian lamb2({0.8f, 0.8f, 0});
+	Metal metal1({0.8f, 0.6f, 0.2f}, 1);
+	Metal metal2({0.8f, 0.8f, 0.8f}, 0.3f);
+
+	Sphere sphere1({0, 0, -1}, 0.5f, lamb1);
+	Sphere sphere2({0, -100.5f, -1}, 100, lamb2);
+	Sphere sphere3({1, 0, -1}, 0.5f, metal1);
+	Sphere sphere4({-1, 0, -1}, 0.5f, metal2);
 
 	Scene scene;
 	scene.shapes.push_back(&sphere1);
 	scene.shapes.push_back(&sphere2);
+	scene.shapes.push_back(&sphere3);
+	scene.shapes.push_back(&sphere4);
 
 	Camera camera;
 	Image image(640, 360);

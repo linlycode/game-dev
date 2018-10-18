@@ -4,7 +4,7 @@ void Sphere::fillRaycastHit(const Rayf &ray, float distance,
 							RaycastHit *hit) const {
 	if (hit) {
 		Vector3f normal = (ray.point(distance) - this->center).normalized();
-		*hit = RaycastHit(distance, normal);
+		*hit = RaycastHit(distance, normal, *this->material);
 	}
 }
 
@@ -20,7 +20,7 @@ bool Sphere::raycast(const Rayf &ray, RaycastHit *hit) const {
 	}
 
 	float d = (-b - std::sqrt(discriminant)) / (2 * a);
-	if (d > 0.001f) {	// ignore near-zero length rays to avoid shadow acne
+	if (d > 0.001f) { // ignore near-zero length rays to avoid shadow acne
 		fillRaycastHit(ray, d, hit);
 		return true;
 	}

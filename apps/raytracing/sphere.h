@@ -10,8 +10,8 @@ public:
 	float radius;
 
 public:
-	Sphere(Vector3f center, float radius)
-		: Shape(), center(center), radius(radius) {}
+	Sphere(Vector3f center, float radius, Material &material)
+		: Shape(material), center(center), radius(radius) {}
 
 	bool raycast(const Rayf &ray, RaycastHit *hit) const override;
 

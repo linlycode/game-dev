@@ -108,6 +108,14 @@ public:
 		return static_cast<Vec &>(*this);
 	}
 
+	Vec pointwise(const Vec &other) const {
+		Vec v("no init");
+		for (size_t i = 0; i < N; i++) {
+			v[i] = m_data[i] * other[i];
+		}
+		return v;
+	}
+
 	// dot product
 	T operator*(const Vec &other) const {
 		T s = 0;
