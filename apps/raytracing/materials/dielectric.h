@@ -1,26 +1,23 @@
-#ifndef LAMBERTIAN_H
-#define LAMBERTIAN_H
+#ifndef DIELETRIC_H
+#define DIELETRIC_H
 
 #include "../random.h"
 #include "../material.h"
 
-class Lambertian : public Material {
+class Dielectric : public Material {
 	RandomNumberGenerator<float> &m_randGen;
 
 public:
-	Vector3f albedo;
+	float refractiveIndex;
 
-	Lambertian(const Vector3f &albedo)
+	Dielectric(float refractiveIndex)
 		: Material(), m_randGen(*new RandomNumberGenerator<float>(0, 1)),
-		  albedo(albedo) {}
+		  refractiveIndex(refractiveIndex) {}
 
-	~Lambertian() { delete &m_randGen; }
+	~Dielectric() { delete &m_randGen; }
 
 	bool scatter(const Rayf &ray, const RaycastHit &hit, Vector3f &attenuation,
 				 Rayf &scattered) const override;
-
-private:
-	Vector3f randomPointInSphere() const;
 };
 
 #endif

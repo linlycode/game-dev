@@ -1,9 +1,6 @@
 #include "../shape.h"
+#include "../optics.h"
 #include "metal.h"
-
-static Vector3f reflect(const Vector3f &v, const Vector3f &n) {
-	return v - 2 * v.dot(n) * n;
-}
 
 bool Metal::scatter(const Rayf &ray, const RaycastHit &hit,
 					Vector3f &attenuation, Rayf &scattered) const {

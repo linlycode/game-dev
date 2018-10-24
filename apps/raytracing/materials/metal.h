@@ -24,7 +24,7 @@ public:
 	void setFuzziness(float f) { m_fuzziness = f < 1 ? f : 1; }
 
 	bool scatter(const Rayf &ray, const RaycastHit &hit, Vector3f &attenuation,
-				 Rayf &scattered) const;
+				 Rayf &scattered) const override;
 
 private:
 	Vector3f randomPointInSphere() const;

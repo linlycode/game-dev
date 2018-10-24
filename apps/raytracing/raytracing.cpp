@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "materials/lambertian.h"
 #include "materials/metal.h"
+#include "materials/dielectric.h"
 #include "ppm.h"
 
 Vector3f compute_color(const Scene &scene, const Rayf &ray, size_t depth) {
@@ -51,13 +52,13 @@ void render(const Scene &scene, const Camera &camera, Image &image) {
 int main() {
 	Lambertian lamb1({0.8f, 0.3f, 0.3f});
 	Lambertian lamb2({0.8f, 0.8f, 0});
-	Metal metal1({0.8f, 0.6f, 0.2f}, 1);
-	Metal metal2({0.8f, 0.8f, 0.8f}, 0.3f);
+	Metal metal1({0.8f, 0.6f, 0.2f}, 0.2f);
+	Dielectric diele1(1.5f);
 
 	Sphere sphere1({0, 0, -1}, 0.5f, lamb1);
 	Sphere sphere2({0, -100.5f, -1}, 100, lamb2);
 	Sphere sphere3({1, 0, -1}, 0.5f, metal1);
-	Sphere sphere4({-1, 0, -1}, 0.5f, metal2);
+	Sphere sphere4({-1, 0, -1}, 0.5f, diele1);
 
 	Scene scene;
 	scene.shapes.push_back(&sphere1);
