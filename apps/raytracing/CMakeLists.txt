@@ -3,7 +3,7 @@ add_executable(raytracing
 	shape.h
 	sphere.h sphere.cpp
 	scene.h scene.cpp
-	camera.h
+	camera.h camera.cpp
 	optics.h optics.cpp
 	material.h
 	materials/lambertian.h materials/lambertian.cpp

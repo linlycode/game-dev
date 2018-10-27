@@ -66,8 +66,10 @@ int main() {
 	scene.shapes.push_back(&sphere3);
 	scene.shapes.push_back(&sphere4);
 
-	Camera camera;
-	Image image(640, 360);
+	int w = 640, h = 360;
+	Image image(w, h);
+
+	Camera camera({-2, 2, 1}, {0, 0, -1}, {0, 1, 0}, 90, float(w) / h);
 
 	render(scene, camera, image);
 

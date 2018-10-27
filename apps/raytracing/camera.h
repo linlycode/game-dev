@@ -3,17 +3,15 @@
 
 #include "math/ray.h"
 
-struct Camera {
-	Vector3f origin, lowerLeft, horizontal, vertical;
+class Camera {
+public:
+	Camera(const Vector3f &lookFrom, const Vector3f &lookAt, const Vector3f &up,
+		   float vFov, float aspect);
 
-	Camera()
-		: lowerLeft(-2, -1.125f, -1), horizontal(4, 0, 0),
-		  vertical(0, 2.25f, 0) {}
+	Rayf genRay(float u, float v) const;
 
-	Rayf genRay(float u, float v) const {
-		Vector3f direction = lowerLeft + u * horizontal + v * vertical - origin;
-		return Rayf(origin, direction);
-	}
+private:
+	Vector3f m_origin, m_lowerLeft, m_horizontal, m_vertical;
 };
 
 #endif
