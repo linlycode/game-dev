@@ -6,6 +6,8 @@ UseTab: Always
 ---
 Language: Cpp
 AlignEscapedNewlines: DontAlign
+AlignAfterOpenBracket: DontAlign
 SortIncludes: false
 AccessModifierOffset: -4
+NamespaceIndentation: All
 AlwaysBreakTemplateDeclarations: Yes
