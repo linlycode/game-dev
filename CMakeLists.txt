@@ -19,5 +19,6 @@ elseif (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 if (BUILD_APPS)
+	add_subdirectory(infra)
 	add_subdirectory(apps)
 endif()

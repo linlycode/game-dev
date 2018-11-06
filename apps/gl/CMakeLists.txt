@@ -11,5 +11,5 @@ add_executable(glapp
 	main.cpp
 )
 
-target_include_directories(glapp PRIVATE ${GLEW_INCLUDE_DIR})
-target_link_libraries(glapp glfw ${GLEW_LIBRARIES} ${OPENGL_gl_LIBRARY} fmt::fmt)
+target_include_directories(glapp PRIVATE ${GLEW_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
+target_link_libraries(glapp glfw ${GLEW_LIBRARIES} ${OPENGL_gl_LIBRARY} infra fmt::fmt)
