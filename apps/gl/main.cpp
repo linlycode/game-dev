@@ -33,7 +33,7 @@ int main() {
 		while (!glfwWindowShouldClose(window)) {
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			glDrawArrays(GL_TRIANGLES, 0, 3);
+			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0);
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
@@ -73,20 +73,31 @@ namespace {
 		// clang-format off
 		float vertices[] = {
 			-0.5f, -0.5f, 0,
-			0.5f,  -0.5f, 0,
-			0,     0.5f,  0
+			 0.5f, -0.5f, 0,
+			-0.5f,  0.5f, 0,
+			 0.5f,  0.5f, 0
+		};
+
+		unsigned int indices[] = {
+			0, 1, 2, 3
 		};
 		// clang-format on
-
-		GLuint buf;
-		glGenBuffers(1, &buf);
-		glBindBuffer(GL_ARRAY_BUFFER, buf);
-		glBufferData(
-			GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 		GLuint vertArray;
 		glGenVertexArrays(1, &vertArray);
 		glBindVertexArray(vertArray);
+
+		GLuint vertBuf;
+		glGenBuffers(1, &vertBuf);
+		glBindBuffer(GL_ARRAY_BUFFER, vertBuf);
+		glBufferData(
+			GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		GLuint indexBuf;
+		glGenBuffers(1, &indexBuf);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuf);
+		glBufferData(
+			GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 		GLint pos = glGetAttribLocation(program, "pos");
 		glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3,
