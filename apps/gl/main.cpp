@@ -14,7 +14,9 @@
 namespace {
 	void resize_viewport(GLFWwindow *window, int width, int height);
 	GLuint make_program();
-	GLuint make_texture(const std::string &filename);
+	GLuint make_texture(
+		GLenum texUnit, const std::string &filename, bool vflip = true);
+	void bind_texture(GLuint program, const char *uniform, GLint index);
 	GLuint make_vertex_array(GLuint program);
 } // namespace
 
@@ -40,9 +42,15 @@ int main(int argc, const char *argv[]) {
 		GLuint program = make_program();
 		glUseProgram(program);
 
-		GLuint texture =
-			make_texture(filepath::join(assetDir, "wooden container.jpg"));
-		glBindTexture(GL_TEXTURE_2D, texture);
+		GLuint texture0 = make_texture(
+			GL_TEXTURE0, filepath::join(assetDir, "wooden container.jpg"));
+		glBindTexture(GL_TEXTURE_2D, texture0);
+		bind_texture(program, "uTexture0", 0);
+
+		GLuint texture1 = make_texture(
+			GL_TEXTURE1, filepath::join(assetDir, "awesomeface.png"));
+		glBindTexture(GL_TEXTURE_2D, texture1);
+		bind_texture(program, "uTexture1", 1);
 
 		GLuint vertArray = make_vertex_array(program);
 		glBindVertexArray(vertArray);
@@ -86,15 +94,19 @@ namespace {
 			"#version 450\n"
 			"in vec2 texCoord;\n"
 			"out vec4 color;\n"
-			"uniform sampler2D uTexture;\n"
+			"uniform sampler2D uTexture0;\n"
+			"uniform sampler2D uTexture1;\n"
 			"void main() {\n"
-			"\tcolor = texture(uTexture, texCoord);\n"
+			"\tcolor = mix(texture(uTexture0, texCoord), texture(uTexture1, texCoord), 0.2);\n"
 			"}\n"});
 		// clang-format on
 		return create_program({vertShader, fragShader});
 	}
 
-	GLuint make_texture(const std::string &filename) {
+	GLuint make_texture(
+		GLenum texUnit, const std::string &filename, bool vflip) {
+		glActiveTexture(texUnit);
+
 		GLuint texture;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -104,6 +116,8 @@ namespace {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+		stbi_set_flip_vertically_on_load(vflip);
+
 		int width, height, nChan;
 		unsigned char *imgData =
 			stbi_load(filename.c_str(), &width, &height, &nChan, 0);
@@ -112,12 +126,18 @@ namespace {
 				fmt::sprintf("failed to open file \"%s\"", filename));
 		}
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+		GLenum format = nChan == 3 ? GL_RGB : GL_RGBA;
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
 			GL_UNSIGNED_BYTE, imgData);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		stbi_image_free(imgData);
 		return texture;
+	}
+
+	void bind_texture(GLuint program, const char *uniform, GLint index) {
+		GLint loc = glGetUniformLocation(program, uniform);
+		glUniform1i(loc, index);
 	}
 
 	GLuint make_vertex_array(GLuint program) {
