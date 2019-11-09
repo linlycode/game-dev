@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
+project(GameDev)
+
 option(BUILD_APPS "Build apps" ON)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -20,5 +22,6 @@ endif()
 
 if (BUILD_APPS)
 	add_subdirectory(infra)
+	add_subdirectory(third_party/glad)
 	add_subdirectory(apps)
 endif()

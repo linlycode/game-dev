@@ -1,7 +1,7 @@
 #ifndef GL_LOADER_H
 #define GL_LOADER_H
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 void load_GL_funcs();
 

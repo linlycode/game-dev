@@ -6,10 +6,9 @@
 #include "gl_loader.h"
 
 void load_GL_funcs() {
-	GLenum err = glewInit();
-	if (err != GLEW_OK) {
-		std::string msg = fmt::sprintf("GLEW initialization failed, %s",
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
-		throw std::runtime_error(msg);
+	if (!gladLoadGL()) {
+		throw std::runtime_error(
+			fmt::sprintf("failed to load OpenGL functions, version: %d.%d",
+				GLVersion.major, GLVersion.minor));
 	}
 }
