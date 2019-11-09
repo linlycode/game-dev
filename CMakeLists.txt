@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.13)
 
 project(GameDev)
 
 option(BUILD_APPS "Build apps" ON)
+option(BUILD_TESTS "Build tests" ON)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -18,6 +19,13 @@ if (MSVC)
 	endif()
 elseif (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
+endif()
+
+if (BUILD_TESTS)
+	find_package(Catch2)
+
+	add_executable(tests test_main.cpp)
+	target_link_libraries(tests Catch2::Catch2)
 endif()
 
 if (BUILD_APPS)
