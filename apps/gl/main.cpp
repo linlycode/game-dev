@@ -1,11 +1,10 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <fmt/printf.h>
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "third_party/stb_image.h"
 
+#include "infra/fmt.h"
 #include "infra/filepath.h"
 
 #include "shader_util.h"
@@ -123,7 +122,7 @@ namespace {
 			stbi_load(filename.c_str(), &width, &height, &nChan, 0);
 		if (!imgData) {
 			throw std::runtime_error(
-				fmt::sprintf("failed to open file \"%s\"", filename));
+				fmt::sprintf("failed to open file \"%s\"", filename.c_str()));
 		}
 
 		GLenum format = nChan == 3 ? GL_RGB : GL_RGBA;

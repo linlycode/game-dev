@@ -1,3 +1,3 @@
-add_library(infra STATIC
-	filepath.h filepath.cpp
-)
+set(SOURCES fmt.h fmt.cpp filepath.h filepath.cpp)
+
+add_library(infra STATIC ${SOURCES})
