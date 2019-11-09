@@ -25,6 +25,8 @@ if (BUILD_TESTS)
 	find_package(Catch2)
 
 	add_executable(tests test_main.cpp)
+	add_subdirectory(math)
+
 	target_link_libraries(tests Catch2::Catch2)
 endif()
 
