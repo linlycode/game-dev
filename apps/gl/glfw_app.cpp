@@ -1,8 +1,7 @@
 #include <stdexcept>
 #include <iostream>
 
-#include <fmt/printf.h>
-
+#include "infra/fmt.h"
 #include "glfw_app.h"
 
 static void log_error(int code, const char *description) {

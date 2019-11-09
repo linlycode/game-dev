@@ -1,8 +1,7 @@
 #include <string>
 #include <stdexcept>
 
-#include <fmt/printf.h>
-
+#include "infra/fmt.h"
 #include "gl_loader.h"
 
 void load_GL_funcs() {

@@ -1,19 +1,18 @@
 #include <stdexcept>
 
-#include <fmt/printf.h>
-
+#include "infra/fmt.h"
 #include "gl_err.h"
 #include "shader_util.h"
 
 CreateShaderError::CreateShaderError(GLenum type)
 	: GLError(glGetError(),
-		  fmt::sprintf("create %s failed", get_shader_type_name(type))),
+		  fmt::sprintf("create %s failed", get_shader_type_name(type).c_str())),
 	  type(type) {}
 
 CompileShaderError::CompileShaderError(
 	GLenum type, GLuint shader, std::string log)
 	: GLError(glGetError(), fmt::sprintf("compile %s %d failed, log:\n%s",
-								get_shader_type_name(type), shader, log)),
+								get_shader_type_name(type).c_str(), shader, log.c_str())),
 	  type(type), shader(shader), log(log) {}
 
 CreateProgramError::CreateProgramError(const std::vector<GLuint> &shaders)
