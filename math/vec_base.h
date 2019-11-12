@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <initializer_list>
 
 template <typename T, size_t N, template <typename, size_t> class Derived>
 class VectorBase {
@@ -19,11 +20,6 @@ public:
 	VectorBase() { std::fill(m_data, m_data + N, 0); }
 
 	template <typename U>
-	VectorBase(const U (&a)[N]) {
-		std::copy(a, a + N, m_data);
-	}
-
-	template <typename U>
 	VectorBase(const Derived<U, N> &other) {
 		*this = other;
 	}
@@ -32,6 +28,19 @@ public:
 	VectorBase &operator=(const Derived<U, N> &other) {
 		std::copy(other.m_data, other.m_data + N, m_data);
 		return *this;
+	}
+
+	template <typename U>
+	VectorBase(const U (&a)[N]) {
+		std::copy(a, a + N, m_data);
+	}
+
+	template <typename U>
+	VectorBase(std::initializer_list<U> list) : VectorBase() {
+		size_t n = std::min(N, list.size());
+		for (size_t i = 0; i < n; i++) {
+			m_data[i] = *(list.begin() + i);
+		}
 	}
 
 	T operator[](size_t i) const { return m_data[i]; }
@@ -154,10 +163,13 @@ public: \
 	Vector() : Base() {} \
 \
 	template <typename U> \
+	Vector(const Vector<U, N> &other) : Base(other) {} \
+\
+	template <typename U> \
 	Vector(const U(&a)[N]) : Base(a) {} \
 \
 	template <typename U> \
-	Vector(const Vector<U, N> &other) : Base(other) {} \
+	Vector(std::initializer_list<U> list) : Base(list) {} \
 \
 private: \
 	Vector(const char *s) : Base(s) {} // no init
