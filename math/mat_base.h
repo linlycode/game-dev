@@ -23,6 +23,17 @@ public:
 	MatrixBase() { std::fill(m_data, m_data + M * N, 0); }
 
 	template <typename U>
+	MatrixBase(const Derived<U, M, N> &other) {
+		*this = other;
+	}
+
+	template <typename U>
+	MatrixBase &operator=(const Derived<U, M, N> &other) {
+		std::copy(other.m_data, other.m_data + M * N, m_data);
+		return *this;
+	}
+
+	template <typename U>
 	MatrixBase(const U (&a)[M * N], StorageOrder order) {
 		assign(a, order);
 	}
@@ -45,10 +56,6 @@ public:
 				(*this)(i, j) = *(row->begin() + j);
 			}
 		}
-	}
-
-	MatrixBase(const MatrixBase &other) {
-		std::copy(other.m_data, other.m_data + M * N, m_data);
 	}
 
 	template <typename U>
@@ -154,6 +161,9 @@ public: \
 	Matrix() : Base() {} \
 \
 	template <typename U> \
+	Matrix(const Matrix<U, M, N> &other) : Base(other) {} \
+\
+	template <typename U> \
 	Matrix(const U(&a)[M * N], StorageOrder order) : Base(a, order) {} \
 \
 	template <typename U> \
@@ -162,9 +172,6 @@ public: \
 	template <typename U> \
 	Matrix(std::initializer_list<std::initializer_list<U>> list) \
 		: Base(list) {} \
-\
-	template <typename U> \
-	Matrix(const Matrix<U, M, N> &other) : Base(other) {} \
 \
 private: \
 	Matrix(const char *s) : Base(s) {} // no init
