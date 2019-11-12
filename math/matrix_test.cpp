@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 
+#include "mat_test_helper.h"
 #include "matrix.h"
 
 namespace {
@@ -10,6 +11,30 @@ TEST_CASE("matrix default constructor", tags) {
 	Matrix<int, 2, 2> mat;
 	CHECK(
 		(mat(0, 0) == 0 && mat(0, 1) == 0 && mat(1, 0) == 0 && mat(1, 1) == 0));
+}
+
+TEST_CASE("matrix copy constructor", tags) {
+	Matrix<int, 2, 2> m1 = {
+		{2, -1},
+		{3, 9},
+	};
+
+	Matrix<int, 2, 2> m2(m1);
+
+	CHECK(mat_equal(m1, m2));
+}
+
+TEST_CASE("matrix assignment", tags) {
+	Matrix<int, 2, 2> m1 = {
+		{2, -1},
+		{3, 9},
+	};
+
+	Matrix<int, 2, 2> m2;
+
+	m2 = m1;
+
+	CHECK(mat_equal(m1, m2));
 }
 
 TEST_CASE("matrix array constructor", tags) {
