@@ -85,6 +85,18 @@ public:
 
 	T &operator()(size_t i, size_t j) { return m_data[j * M + i]; }
 
+	template <typename U>
+	void getData(U (&a)[M * N], StorageOrder order) {
+		if (order == COLUMN_MAJOR) {
+			std::copy(m_data, m_data + M * N, a);
+		} else {
+			for (size_t i = 0; i < M * N; i++) {
+				size_t row = i % M, col = i / M;
+				a[row * N + col] = m_data[i];
+			}
+		}
+	}
+
 	// negate
 	Mat operator-() const {
 		Mat m("no init");
