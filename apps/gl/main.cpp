@@ -7,8 +7,14 @@
 #include "infra/fmt.h"
 #include "infra/filepath.h"
 
+#include "math/trans_mat.h"
+
 #include "shader_util.h"
 #include "glfw_app.h"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 namespace {
 	void resize_viewport(GLFWwindow *window, int width, int height);
@@ -54,12 +60,26 @@ int main(int argc, const char *argv[]) {
 		GLuint vertArray = make_vertex_array(program);
 		glBindVertexArray(vertArray);
 
+		Matrix4f transMat =
+			perspective_projection(45 * static_cast<float>(M_PI) / 180,
+				800.0f / 600, 0.1f, 100.0f) *
+			translate(Vector3f(0, 0, -3)) *
+			rotate(Vector3f(1, 1, 0), 30 * static_cast<float>(M_PI) / 180);
+
+		float rawMat[16];
+
+		transMat.getData(rawMat, COLUMN_MAJOR);
+		GLint loc = glGetUniformLocation(program, "transMat");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, rawMat);
+
+		glEnable(GL_DEPTH_TEST);
+
 		glClearColor(0.2f, 0.3f, 0.3f, 1);
 
 		while (!glfwWindowShouldClose(window)) {
-			glClear(GL_COLOR_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLE_STRIP, 30, GL_UNSIGNED_INT, 0);
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
@@ -71,9 +91,11 @@ int main(int argc, const char *argv[]) {
 	return 0;
 }
 
+#define RESTART_INDEX 65535
+
 namespace {
 
-	void resize_viewport(GLFWwindow *window, int width, int height) {
+	void resize_viewport(GLFWwindow *, int width, int height) {
 		glViewport(0, 0, width, height);
 	}
 
@@ -84,8 +106,9 @@ namespace {
 			"in vec3 aPos;\n"
 			"in vec2 aTexCoord;\n"
 			"out vec2 texCoord;\n"
+			"uniform mat4 transMat;\n"
 			"void main() {\n"
-			"\tgl_Position = vec4(aPos, 1);\n"
+			"\tgl_Position = transMat * vec4(aPos, 1);\n"
 			"\ttexCoord = aTexCoord;\n"
 			"}\n"});
 
@@ -143,16 +166,56 @@ namespace {
 		// clang-format off
 		float vertices[] = {
 			// positions         // texture coordinates
-			-0.5f, -0.5f, 0,     0, 0,
-			 0.5f, -0.5f, 0,     1, 0,
-			-0.5f,  0.5f, 0,     0, 1,
-			 0.5f,  0.5f, 0,     1, 1
+
+			// front
+			-0.5f, -0.5f,  0.5f,    0, 0,
+			 0.5f, -0.5f,  0.5f,    1, 0,
+			-0.5f,  0.5f,  0.5f,    0, 1,
+			 0.5f,  0.5f,  0.5f,    1, 1,
+
+			// back
+			 0.5f, -0.5f, -0.5f,    0, 0,
+			-0.5f, -0.5f, -0.5f,    1, 0,
+			 0.5f,  0.5f, -0.5f,    0, 1,
+			-0.5f,  0.5f, -0.5f,    1, 1,
+
+			// left
+			-0.5f, -0.5f, -0.5f,    0, 0,
+			-0.5f, -0.5f,  0.5f,    1, 0,
+			-0.5f,  0.5f, -0.5f,    0, 1,
+			-0.5f,  0.5f,  0.5f,    1, 1,
+
+			// right
+			 0.5f, -0.5f,  0.5f,    0, 0,
+			 0.5f, -0.5f, -0.5f,    1, 0,
+			 0.5f,  0.5f,  0.5f,    0, 1,
+			 0.5f,  0.5f, -0.5f,    1, 1,
+
+			// top
+			-0.5f,  0.5f,  0.5f,    0, 0,
+			 0.5f,  0.5f,  0.5f,    1, 0,
+			-0.5f,  0.5f, -0.5f,    0, 1,
+			 0.5f,  0.5f, -0.5f,    1, 1,
+
+			// bottom
+			-0.5f, -0.5f, -0.5f,    0, 0,
+			 0.5f, -0.5f, -0.5f,    1, 0,
+			-0.5f, -0.5f,  0.5f,    0, 1,
+			 0.5f, -0.5f,  0.5f,    1, 1
 		};
 
 		unsigned int indices[] = {
-			0, 1, 2, 3
+			 0,  1,  2,  3, RESTART_INDEX,
+			 4,  5,  6,  7, RESTART_INDEX,
+			 8,  9, 10, 11, RESTART_INDEX,
+			12, 13, 14, 15, RESTART_INDEX,
+			16, 17, 18, 19, RESTART_INDEX,
+			20, 21, 22, 23, RESTART_INDEX,
 		};
 		// clang-format on
+
+		glEnable(GL_PRIMITIVE_RESTART);
+		glPrimitiveRestartIndex(RESTART_INDEX);
 
 		GLuint vertArray;
 		glGenVertexArrays(1, &vertArray);
