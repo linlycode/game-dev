@@ -6,23 +6,26 @@
 
 #include "infra/fmt.h"
 #include "infra/filepath.h"
-
 #include "math/trans_mat.h"
-
 #include "shader_util.h"
-#include "glfw_app.h"
+#include "window.h"
+#include "app.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
 namespace {
-	void resize_viewport(GLFWwindow *window, int width, int height);
+
 	GLuint make_program();
+
 	GLuint make_texture(
 		GLenum texUnit, const std::string &filename, bool vflip = true);
+
 	void bind_texture(GLuint program, const char *uniform, GLint index);
+
 	GLuint make_vertex_array(GLuint program);
+
 } // namespace
 
 int main(int argc, const char *argv[]) {
@@ -34,13 +37,10 @@ int main(int argc, const char *argv[]) {
 	std::string assetDir(argv[1]);
 
 	try {
-		GLFWApp app;
-		GLFWwindow *window =
-			app.createWindow(800, 600, "OpenGL App", nullptr, nullptr);
-
-		glfwSetFramebufferSizeCallback(window, resize_viewport);
-
-		glfwMakeContextCurrent(window);
+		App app;
+		Window window("OpenGL App", 800, 600);
+		window.onResize(
+			[](int width, int height) { glViewport(0, 0, width, height); });
 
 		load_GL_funcs();
 
@@ -76,13 +76,13 @@ int main(int argc, const char *argv[]) {
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1);
 
-		while (!glfwWindowShouldClose(window)) {
+		while (!app.shouldExit()) {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			glDrawElements(GL_TRIANGLE_STRIP, 30, GL_UNSIGNED_INT, 0);
 
-			glfwSwapBuffers(window);
-			glfwPollEvents();
+			window.swapBuffers();
+			app.pollEvents();
 		}
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;
@@ -94,10 +94,6 @@ int main(int argc, const char *argv[]) {
 #define RESTART_INDEX 65535
 
 namespace {
-
-	void resize_viewport(GLFWwindow *, int width, int height) {
-		glViewport(0, 0, width, height);
-	}
 
 	GLuint make_program() {
 		// clang-format off
