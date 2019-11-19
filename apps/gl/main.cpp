@@ -231,12 +231,12 @@ namespace {
 		GLsizei stride = sizeof(float) * 5;
 
 		GLint pos = glGetAttribLocation(program, "aPos");
-		glEnableVertexArrayAttrib(vertArray, pos);
+		glEnableVertexAttribArray(pos);
 		glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, stride,
 			reinterpret_cast<const void *>(0));
 
 		GLint texCoord = glGetAttribLocation(program, "aTexCoord");
-		glEnableVertexArrayAttrib(vertArray, texCoord);
+		glEnableVertexAttribArray(texCoord);
 		glVertexAttribPointer(texCoord, 2, GL_FLOAT, GL_FALSE, stride,
 			reinterpret_cast<const void *>(sizeof(float) * 3));
 		return vertArray;
