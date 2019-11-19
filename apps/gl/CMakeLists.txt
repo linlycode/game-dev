@@ -3,7 +3,7 @@ find_package(SDL2 REQUIRED)
 
 add_executable(glapp
 	gl_loader.h gl_loader.cpp
-	gl_err.h
+	gl_err.h gl_err.cpp
 	shader_util.h shader_util.cpp
 	window.h window.cpp
 	app.h app.cpp

@@ -91,7 +91,7 @@ int main(int argc, const char *argv[]) {
 	return 0;
 }
 
-#define RESTART_INDEX 65535
+#define RESTART_INDEX 4294967295
 
 namespace {
 
@@ -110,8 +110,8 @@ namespace {
 
 		GLuint fragShader = create_shader(GL_FRAGMENT_SHADER, {
 			"#version 450\n"
-			"in vec2 texCoord;\n"
-			"out vec4 color;\n"
+			"in highp vec2 texCoord;\n"
+			"out highp vec4 color;\n"
 			"uniform sampler2D uTexture0;\n"
 			"uniform sampler2D uTexture1;\n"
 			"void main() {\n"
@@ -210,8 +210,7 @@ namespace {
 		};
 		// clang-format on
 
-		glEnable(GL_PRIMITIVE_RESTART);
-		glPrimitiveRestartIndex(RESTART_INDEX);
+		glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
 
 		GLuint vertArray;
 		glGenVertexArrays(1, &vertArray);
