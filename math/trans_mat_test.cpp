@@ -14,7 +14,7 @@ TEST_CASE("translate", "[math]") {
 
 	Matrix4f expected(a);
 
-	CHECK(mat_equal(translate(Vector3f(1, 2, 0)), expected));
+	CHECK(mat_equal(tfm::translate(Vector3f(1, 2, 0)), expected));
 }
 
 TEST_CASE("rotate", "[math]") {
@@ -31,7 +31,7 @@ TEST_CASE("rotate", "[math]") {
 
 	Matrix4f expected(a);
 
-	CHECK(mat_equal(rotate(axis, angle), expected));
+	CHECK(mat_equal(tfm::rotate(axis, angle), expected));
 }
 
 TEST_CASE("scale", "[math]") {
@@ -46,5 +46,5 @@ TEST_CASE("scale", "[math]") {
 
 	Matrix4f expected(a);
 
-	CHECK(mat_equal(scale(Vector3f(0.5f, 0.5f, 0.3f)), expected));
+	CHECK(mat_equal(tfm::scale(Vector3f(0.5f, 0.5f, 0.3f)), expected));
 }
