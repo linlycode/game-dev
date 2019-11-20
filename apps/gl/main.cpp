@@ -58,10 +58,10 @@ int main(int argc, const char *argv[]) {
 		glBindVertexArray(vertArray);
 
 		Matrix4f transMat =
-			perspective_projection(45 * static_cast<float>(M_PI) / 180,
+			tfm::perspective_projection_fovy(45 * static_cast<float>(M_PI) / 180,
 				800.0f / 600, 0.1f, 100.0f) *
-			translate(Vector3f(0, 0, -3)) *
-			rotate(Vector3f(1, 1, 0), 30 * static_cast<float>(M_PI) / 180);
+			tfm::translate(Vector3f(0, 0, -3)) *
+			tfm::rotate(Vector3f(1, 1, 0), 30 * static_cast<float>(M_PI) / 180);
 
 		float rawMat[16];
 
