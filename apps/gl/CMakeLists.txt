@@ -5,6 +5,7 @@ add_executable(glapp
 	gl_loader.h gl_loader.cpp
 	gl_err.h gl_err.cpp
 	shader_util.h shader_util.cpp
+	mouse_input.h
 	window.h window.cpp
 	app.h app.cpp
 	main.cpp
