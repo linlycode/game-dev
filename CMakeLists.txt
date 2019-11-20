@@ -27,6 +27,7 @@ if (BUILD_TESTS)
 	add_executable(tests test_main.cpp)
 	add_subdirectory(math)
 
+	target_include_directories(tests PRIVATE ${CMAKE_SOURCE_DIR})
 	target_link_libraries(tests Catch2::Catch2)
 endif()
 

@@ -1,11 +1,8 @@
+#include "math/constants.h"
 #include "camera.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 Camera::Camera(const Vector3f &lookFrom, const Vector3f &lookAt,
-			   const Vector3f &up, float vFov, float aspect) {
+	const Vector3f &up, float vFov, float aspect) {
 	float theta = vFov * M_PI / 180;
 	float halfHeight = std::tan(theta / 2);
 	float halfWidth = aspect * halfHeight;

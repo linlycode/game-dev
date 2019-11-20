@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 
+#include "math/constants.h"
 #include "mat_test_helper.h"
 #include "trans_mat.h"
 
