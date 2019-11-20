@@ -8,9 +8,13 @@
 #include "infra/filepath.h"
 #include "math/constants.h"
 #include "math/trans_mat.h"
+#include "transform.h"
 #include "shader_util.h"
 #include "window.h"
 #include "app.h"
+#include "camera.h"
+#include "camera_controller.h"
+#include "mouse_input_handler.h"
 
 namespace {
 
@@ -35,7 +39,7 @@ int main(int argc, const char *argv[]) {
 
 	try {
 		App app;
-		Window window("OpenGL App", 800, 600);
+		Window window("OpenGL App", 1066, 600);
 		window.onResize(
 			[](int width, int height) { glViewport(0, 0, width, height); });
 
@@ -57,17 +61,25 @@ int main(int argc, const char *argv[]) {
 		GLuint vertArray = make_vertex_array(program);
 		glBindVertexArray(vertArray);
 
-		Matrix4f transMat =
-			tfm::perspective_projection_fovy(45 * static_cast<float>(M_PI) / 180,
-				800.0f / 600, 0.1f, 100.0f) *
-			tfm::translate(Vector3f(0, 0, -3)) *
-			tfm::rotate(Vector3f(1, 1, 0), 30 * static_cast<float>(M_PI) / 180);
+		Transformf camTrans(Vector3f(0, 0, 3));
+		Matrix4f camProj = tfm::perspective_projection_fovx(
+			static_cast<float>(100 * M_PI / 180), 16.0f / 9, 0.1f, 100.0f);
 
-		float rawMat[16];
+		Camera camera(camTrans, camProj);
 
-		transMat.getData(rawMat, COLUMN_MAJOR);
-		GLint loc = glGetUniformLocation(program, "transMat");
-		glUniformMatrix4fv(loc, 1, GL_FALSE, rawMat);
+		CameraController camCtl(camera);
+		MouseInputHandler mouseHandler(window, camCtl);
+
+		using namespace std::placeholders;
+
+		window.onMouseDown(std::bind(&MouseInputHandler::onMouseDown,
+			std::ref(mouseHandler), _1, _2, _3));
+
+		window.onMouseUp(std::bind(
+			&MouseInputHandler::onMouseUp, std::ref(mouseHandler), _1, _2, _3));
+
+		window.onMouseMove(std::bind(
+			&MouseInputHandler::onMouseMove, std::ref(mouseHandler), _1, _2));
 
 		glEnable(GL_DEPTH_TEST);
 
@@ -75,6 +87,14 @@ int main(int argc, const char *argv[]) {
 
 		while (!app.shouldExit()) {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			Matrix4f transMat = camera.projection * camera.getViewMatrix();
+
+			float rawMat[16];
+			transMat.getData(rawMat, COLUMN_MAJOR);
+
+			GLint loc = glGetUniformLocation(program, "transMat");
+			glUniformMatrix4fv(loc, 1, GL_FALSE, rawMat);
 
 			glDrawElements(GL_TRIANGLE_STRIP, 30, GL_UNSIGNED_INT, 0);
 

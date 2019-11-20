@@ -4,10 +4,14 @@ find_package(SDL2 REQUIRED)
 add_executable(glapp
 	gl_loader.h gl_loader.cpp
 	gl_err.h gl_err.cpp
+	transform.h
 	shader_util.h shader_util.cpp
 	mouse_input.h
 	window.h window.cpp
 	app.h app.cpp
+	camera.h camera.cpp
+	camera_controller.h camera_controller.cpp
+	mouse_input_handler.h mouse_input_handler.cpp
 	main.cpp
 )
 
