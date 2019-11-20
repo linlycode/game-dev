@@ -1,0 +1,6 @@
+#ifndef MOUSE_INPUT_H
+#define MOUSE_INPUT_H
+
+enum MouseButton { MOUSE_BUTTON_LEFT, MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT };
+
+#endif
