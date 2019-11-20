@@ -39,7 +39,7 @@ public:
 	VectorBase(std::initializer_list<U> list) : VectorBase() {
 		size_t n = std::min(N, list.size());
 		for (size_t i = 0; i < n; i++) {
-			m_data[i] = *(list.begin() + i);
+			m_data[i] = static_cast<T>(*(list.begin() + i));
 		}
 	}
 

@@ -22,6 +22,13 @@ public:
 	}
 };
 
+template <typename T>
+class Vector<T, 4> : public VectorBase<T, 4, Vector> {
+	VECTOR_CTORS(Vector, T, 4)
+public:
+	Vector(T x, T y, T z, T w) : Vector({x, y, z, w}) {}
+};
+
 template <typename T, size_t N>
 Vector<T, N> operator*(T s, const Vector<T, N> &v) {
 	return v * s;
