@@ -6,14 +6,11 @@
 
 #include "infra/fmt.h"
 #include "infra/filepath.h"
+#include "math/constants.h"
 #include "math/trans_mat.h"
 #include "shader_util.h"
 #include "window.h"
 #include "app.h"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 namespace {
 
