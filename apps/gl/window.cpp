@@ -1,28 +1,14 @@
 #include <iostream>
-#include <SDL2/SDL.h>
+#include <SDL2/SDL_video.h>
+#include <SDL2/SDL_events.h>
 
 #include "infra/fmt.h"
 #include "window.h"
 
-namespace {
-	MouseButton get_mouse_button(uint8_t btn) {
-		switch (btn) {
-			case SDL_BUTTON_LEFT:
-				return MOUSE_BUTTON_LEFT;
-			case SDL_BUTTON_MIDDLE:
-				return MOUSE_BUTTON_MIDDLE;
-			case SDL_BUTTON_RIGHT:
-				return MOUSE_BUTTON_MIDDLE;
-			default:
-				throw std::domain_error(
-					fmt::sprintf("unhandled mouse button %d", btn));
-		}
-	}
-} // namespace
-
 Window::Window(const char *title, int width, int height)
 	: m_window(nullptr), m_id(0), m_ctx(nullptr), m_onResize(nullptr),
-	  m_onMouseDown(nullptr), m_onMouseUp(nullptr), m_onMouseMove(nullptr) {
+	  m_onMouseBtnInput(nullptr), m_onMouseMove(nullptr),
+	  m_onKeyboardInput(nullptr) {
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
@@ -61,23 +47,27 @@ void Window::getSize(int &width, int &height) const {
 	SDL_GetWindowSize(m_window, &width, &height);
 }
 
-void Window::onResize(std::function<void(int, int)> cb) { m_onResize = cb; }
-
-void Window::onMouseDown(std::function<void(enum MouseButton, int, int)> cb) {
-	m_onMouseDown = cb;
+bool Window::isKeyPressed(KeyboardKey key) const {
+	const uint8_t *state = SDL_GetKeyboardState(nullptr);
+	uint32_t flags = SDL_GetWindowFlags(m_window);
+	return state[key] == 1 && (flags & SDL_WINDOW_INPUT_FOCUS);
 }
 
-void Window::onMouseUp(std::function<void(enum MouseButton, int, int)> cb) {
-	m_onMouseUp = cb;
+void Window::onResize(WindowSizeCallback cb) { m_onResize = cb; }
+
+void Window::onMouseButtonInput(MouseButtonCallback cb) {
+	m_onMouseBtnInput = cb;
 }
 
-void Window::onMouseMove(std::function<void(int, int)> cb) {
-	m_onMouseMove = cb;
-}
+void Window::onMouseMove(MouseMoveCallback cb) { m_onMouseMove = cb; }
+
+void Window::onKeyboardInput(KeyboardKeyCallback cb) { m_onKeyboardInput = cb; }
 
 // return 1 to add the event to the event queue, 0 to drop from the event queue
 int Window::handleEvent(void *data, SDL_Event *event) {
 	Window *wnd = static_cast<Window *>(data);
+
+	double time = static_cast<double>(event->common.timestamp) / 1000;
 
 	switch (event->type) {
 		case SDL_WINDOWEVENT: {
@@ -87,30 +77,29 @@ int Window::handleEvent(void *data, SDL_Event *event) {
 				switch (evt.event) {
 					case SDL_WINDOWEVENT_RESIZED:
 						if (wnd->m_onResize) {
-							wnd->m_onResize(evt.data1, evt.data2);
+							WindowSizeEvent e;
+							e.time = time;
+							e.width = evt.data1;
+							e.width = evt.data2;
+							wnd->m_onResize(e);
 						}
 						break;
 				}
 			}
-
 			break;
 		}
-		case SDL_MOUSEBUTTONDOWN: {
-			const SDL_MouseButtonEvent &evt = event->button;
-			if (evt.which != SDL_TOUCH_MOUSEID && evt.windowID == wnd->m_id) {
-				if (wnd->m_onMouseDown) {
-					wnd->m_onMouseDown(
-						get_mouse_button(evt.button), evt.x, evt.y);
-				}
-			}
-			break;
-		}
+		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP: {
 			const SDL_MouseButtonEvent &evt = event->button;
 			if (evt.which != SDL_TOUCH_MOUSEID && evt.windowID == wnd->m_id) {
-				if (wnd->m_onMouseUp) {
-					wnd->m_onMouseUp(
-						get_mouse_button(evt.button), evt.x, evt.y);
+				if (wnd->m_onMouseBtnInput) {
+					MouseButtonEvent e;
+					e.time = time;
+					e.btn = static_cast<MouseButton>(evt.button);
+					e.state = static_cast<KeyState>(evt.state);
+					e.x = evt.x;
+					e.y = evt.y;
+					wnd->m_onMouseBtnInput(e);
 				}
 			}
 			break;
@@ -119,9 +108,31 @@ int Window::handleEvent(void *data, SDL_Event *event) {
 			const SDL_MouseMotionEvent &evt = event->motion;
 			if (evt.which != SDL_TOUCH_MOUSEID && evt.windowID == wnd->m_id) {
 				if (wnd->m_onMouseMove) {
-					wnd->m_onMouseMove(evt.x, evt.y);
+					MouseMoveEvent e;
+					e.time = time;
+					e.x = evt.x;
+					e.y = evt.y;
+					wnd->m_onMouseMove(e);
 				}
 			}
+			break;
+		}
+		case SDL_KEYDOWN:
+		case SDL_KEYUP: {
+			const SDL_KeyboardEvent &evt = event->key;
+			if (evt.windowID == wnd->m_id) {
+				if (wnd->m_onKeyboardInput) {
+					KeyboardEvent e;
+					e.time = time;
+					e.key = static_cast<KeyboardKey>(evt.keysym.scancode);
+					e.state = static_cast<KeyState>(evt.state);
+					e.mods = static_cast<ModifierKey>(evt.keysym.mod);
+					e.isRepeat = evt.repeat != 0;
+
+					wnd->m_onKeyboardInput(e);
+				}
+			}
+			break;
 		}
 	}
 	return 1;

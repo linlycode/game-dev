@@ -8,6 +8,9 @@ class Camera;
 
 class CameraController {
 public:
+	Camera *camera;
+
+public:
 	// RelativeRotator rotates the camera relative to an initial orientation
 	class RelativeRotator {
 		CameraController *m_ctrlr;
@@ -26,27 +29,26 @@ public:
 
 	friend class RelativeRotator;
 
-	struct RotateSpeed {
+	struct AxesParams {
 		float horizontal;
 		float vertical;
 	};
 
 private:
-	Camera *m_camera;
-	RotateSpeed m_rotSpeed;
-	RotateSpeed m_relRotSpeed;
+	AxesParams m_maxRotSpeed;
+	AxesParams m_maxRelRotSpeed;
+	AxesParams m_rotSpeed;
 
 public:
 	CameraController(Camera &cam,
-		const RotateSpeed &rotSpeed = {static_cast<float>(M_PI / 6),
-			static_cast<float>(M_PI / 9)},
-		const RotateSpeed &relRotSpeed = {static_cast<float>(M_PI / 2),
-			static_cast<float>(M_PI / 2)})
-		: m_camera(&cam), m_rotSpeed(rotSpeed), m_relRotSpeed(relRotSpeed) {}
+		const AxesParams &maxRotSpeed = {float(M_PI / 2), float(M_PI / 2)},
+		const AxesParams &maxRelRotSpeed = {float(M_PI / 2), float(M_PI / 2)});
 
 	RelativeRotator getRelativeRotator();
 
 	void rotateCamera(float horizontal, float vertical);
+
+	void update(double dt); // in seconds
 };
 
 #endif

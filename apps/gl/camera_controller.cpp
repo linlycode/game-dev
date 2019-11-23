@@ -7,31 +7,49 @@ CameraController::RelativeRotator::RelativeRotator(
 
 void CameraController::RelativeRotator::setRotation(
 	float horizontal, float vertical) {
-	float hs = m_ctrlr->m_relRotSpeed.horizontal;
-	float vs = m_ctrlr->m_relRotSpeed.vertical;
+	float hs = m_ctrlr->m_maxRelRotSpeed.horizontal;
+	float vs = m_ctrlr->m_maxRelRotSpeed.vertical;
 
 	Vector3f right = m_initRot.rotate(Vector3f(1, 0, 0));
 	Quaternionf rot = Quaternionf::rotate(right, vs * vertical) * m_initRot;
 
 	Vector3f up = rot.rotate(Vector3f(0, 1, 0));
 
-	m_ctrlr->m_camera->transform.rotation =
+	m_ctrlr->camera->transform.rotation =
 		Quaternionf::rotate(up, -hs * horizontal) * rot;
 }
 
 CameraController::RelativeRotator CameraController::getRelativeRotator() {
-	return RelativeRotator(*this, m_camera->transform.rotation);
+	return RelativeRotator(*this, camera->transform.rotation);
 }
 
-void CameraController::rotateCamera(float horizontal, float vertical) {
+CameraController::CameraController(Camera &cam, const AxesParams &maxRotSpeed,
+	const AxesParams &maxRelRotSpeed)
+	: camera(&cam), m_maxRotSpeed(maxRotSpeed),
+	  m_maxRelRotSpeed(maxRelRotSpeed), m_rotSpeed({0, 0}) {}
+
+void CameraController::rotateCamera(float h, float v) {
+	m_rotSpeed.horizontal = m_maxRotSpeed.horizontal * h;
+	m_rotSpeed.vertical = m_maxRotSpeed.vertical * v;
+}
+
+#define EPSILON 0.000001f
+
+void CameraController::update(double dt) {
 	float hs = m_rotSpeed.horizontal;
 	float vs = m_rotSpeed.vertical;
 
-	Vector3f right = m_camera->transform.rotation.rotate(Vector3f(1, 0, 0));
-	Quaternionf rot = Quaternionf::rotate(right, -vs * vertical) *
-					  m_camera->transform.rotation;
+	Quaternionf rot = camera->transform.rotation;
 
-	Vector3f up = rot.rotate(Vector3f(0, 1, 0));
-	m_camera->transform.rotation =
-		Quaternionf::rotate(up, -hs * horizontal) * rot;
+	if (std::abs(vs) > EPSILON) {
+		Vector3f right = rot.rotate(Vector3f(1, 0, 0));
+		rot = Quaternionf::rotate(right, static_cast<float>(-vs * dt)) * rot;
+	}
+
+	if (std::abs(hs) > EPSILON) {
+		Vector3f up = rot.rotate(Vector3f(0, 1, 0));
+		rot = Quaternionf::rotate(up, static_cast<float>(-hs * dt)) * rot;
+	}
+
+	camera->transform.rotation = rot;
 }

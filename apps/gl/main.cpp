@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <chrono>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "third_party/stb_image.h"
@@ -15,6 +16,7 @@
 #include "camera.h"
 #include "camera_controller.h"
 #include "mouse_input_handler.h"
+#include "keyboard_input_handler.h"
 
 namespace {
 
@@ -41,7 +43,7 @@ int main(int argc, const char *argv[]) {
 		App app;
 		Window window("OpenGL App", 1066, 600);
 		window.onResize(
-			[](int width, int height) { glViewport(0, 0, width, height); });
+			[](WindowSizeEvent e) { glViewport(0, 0, e.width, e.height); });
 
 		load_GL_funcs();
 
@@ -69,36 +71,46 @@ int main(int argc, const char *argv[]) {
 
 		CameraController camCtl(camera);
 		MouseInputHandler mouseHandler(window, camCtl);
-
-		using namespace std::placeholders;
-
-		window.onMouseDown(std::bind(&MouseInputHandler::onMouseDown,
-			std::ref(mouseHandler), _1, _2, _3));
-
-		window.onMouseUp(std::bind(
-			&MouseInputHandler::onMouseUp, std::ref(mouseHandler), _1, _2, _3));
-
-		window.onMouseMove(std::bind(
-			&MouseInputHandler::onMouseMove, std::ref(mouseHandler), _1, _2));
+		KeyboardInputHandler keyHandler(window, camCtl);
 
 		glEnable(GL_DEPTH_TEST);
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1);
+		GLint transMatLoc = glGetUniformLocation(program, "transMat");
+
+		using namespace std::chrono;
+
+		constexpr double frameT = 1.0 / 60;
+		auto t0 = steady_clock::now();
+		double sumT = 0.0f;
 
 		while (!app.shouldExit()) {
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			auto t1 = steady_clock::now();
+			double dt = duration<double>(t1 - t0).count();
+			t0 = t1;
 
-			Matrix4f transMat = camera.projection * camera.getViewMatrix();
+			keyHandler.handleInput();
+			camCtl.update(dt);
 
-			float rawMat[16];
-			transMat.getData(rawMat, COLUMN_MAJOR);
+			sumT += dt;
 
-			GLint loc = glGetUniformLocation(program, "transMat");
-			glUniformMatrix4fv(loc, 1, GL_FALSE, rawMat);
+			if (sumT > frameT) {
+				sumT -= frameT;
 
-			glDrawElements(GL_TRIANGLE_STRIP, 30, GL_UNSIGNED_INT, 0);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			window.swapBuffers();
+				Matrix4f transMat = camera.projection * camera.getViewMatrix();
+
+				float rawMat[16];
+				transMat.getData(rawMat, COLUMN_MAJOR);
+
+				glUniformMatrix4fv(transMatLoc, 1, GL_FALSE, rawMat);
+
+				glDrawElements(GL_TRIANGLE_STRIP, 30, GL_UNSIGNED_INT, 0);
+
+				window.swapBuffers();
+			}
+
 			app.pollEvents();
 		}
 	} catch (const std::exception &e) {
