@@ -13,14 +13,11 @@ class MouseInputHandler {
 	Vector<int, 2> m_rotAnchor;
 
 public:
-	MouseInputHandler(Window &window, CameraController &camCtl)
-		: m_window(&window), m_camCtl(&camCtl), m_shouldRotate(false) {}
+	MouseInputHandler(Window &window, CameraController &camCtl);
 
-	void onMouseDown(enum MouseButton btn, int x, int y);
+	void onMouseButtonInput(MouseButtonEvent);
 
-	void onMouseUp(enum MouseButton btn, int, int);
-
-	void onMouseMove(int x, int y);
+	void onMouseMove(MouseMoveEvent);
 };
 
 #endif

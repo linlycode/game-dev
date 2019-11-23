@@ -6,12 +6,15 @@ add_executable(glapp
 	gl_err.h gl_err.cpp
 	transform.h
 	shader_util.h shader_util.cpp
+	key_state.h
+	keyboard_keys.h
 	mouse_input.h
 	window.h window.cpp
 	app.h app.cpp
 	camera.h camera.cpp
 	camera_controller.h camera_controller.cpp
 	mouse_input_handler.h mouse_input_handler.cpp
+	keyboard_input_handler.h keyboard_input_handler.cpp
 	main.cpp
 )
 
