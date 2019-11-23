@@ -35,16 +35,21 @@ public:
 	};
 
 private:
+	Vector3f m_maxMoveSpeed;
 	AxesParams m_maxRotSpeed;
 	AxesParams m_maxRelRotSpeed;
 	AxesParams m_rotSpeed;
+	Vector3f m_moveSpeed;
 
 public:
 	CameraController(Camera &cam,
+		const Vector3f &maxMoveSpeed = Vector3f(2, 2, 2),
 		const AxesParams &maxRotSpeed = {float(M_PI / 2), float(M_PI / 2)},
 		const AxesParams &maxRelRotSpeed = {float(M_PI / 2), float(M_PI / 2)});
 
 	RelativeRotator getRelativeRotator();
+
+	void moveCamera(float x, float y, float z);
 
 	void rotateCamera(float horizontal, float vertical);
 

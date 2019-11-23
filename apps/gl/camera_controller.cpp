@@ -23,10 +23,16 @@ CameraController::RelativeRotator CameraController::getRelativeRotator() {
 	return RelativeRotator(*this, camera->transform.rotation);
 }
 
-CameraController::CameraController(Camera &cam, const AxesParams &maxRotSpeed,
-	const AxesParams &maxRelRotSpeed)
-	: camera(&cam), m_maxRotSpeed(maxRotSpeed),
+CameraController::CameraController(Camera &cam, const Vector3f &maxMoveSpeed,
+	const AxesParams &maxRotSpeed, const AxesParams &maxRelRotSpeed)
+	: camera(&cam), m_maxMoveSpeed(maxMoveSpeed), m_maxRotSpeed(maxRotSpeed),
 	  m_maxRelRotSpeed(maxRelRotSpeed), m_rotSpeed({0, 0}) {}
+
+void CameraController::moveCamera(float x, float y, float z) {
+	m_moveSpeed[0] = x;
+	m_moveSpeed[1] = y;
+	m_moveSpeed[2] = z;
+}
 
 void CameraController::rotateCamera(float h, float v) {
 	m_rotSpeed.horizontal = m_maxRotSpeed.horizontal * h;
@@ -52,4 +58,7 @@ void CameraController::update(double dt) {
 	}
 
 	camera->transform.rotation = rot;
+
+	camera->transform.translation +=
+		rot.rotate(m_maxMoveSpeed.pointwise(m_moveSpeed) * dt);
 }
